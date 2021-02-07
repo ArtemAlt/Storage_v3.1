@@ -1,31 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="544.0" prefWidth="753.0" xmlns="http://javafx.com/javafx/8.0.202" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ClientController">
-   <children>
-      <HBox layoutY="-2.0" />
-      <Button fx:id="upload" layoutX="332.0" layoutY="246.0" mnemonicParsing="false" onAction="#download" prefHeight="25.0" prefWidth="90.0" text="&lt;-" />
-      <Button fx:id="download" layoutX="332.0" layoutY="215.0" mnemonicParsing="false" onAction="#upload" prefHeight="25.0" prefWidth="90.0" text="-&gt;" />
-      <Button fx:id="open" layoutX="332.0" layoutY="281.0" mnemonicParsing="false" onAction="#openFolder" prefHeight="25.0" prefWidth="90.0" text="Open" />
-      <Label layoutX="98.0" layoutY="26.0" prefHeight="17.0" prefWidth="65.0" text="My PC" />
-      <Label layoutX="436.0" layoutY="26.0" prefHeight="17.0" prefWidth="65.0" text="Server" />
-      <TableView fx:id="clientInfo" layoutX="10.0" layoutY="55.0" prefHeight="468.0" prefWidth="298.0">
-        <columns>
-          <TableColumn fx:id="clName" prefWidth="75.0" text="Name" />
-          <TableColumn fx:id="clDate" prefWidth="75.0" text="Date" />
-            <TableColumn fx:id="clType" prefWidth="75.0" text="Type" />
-            <TableColumn fx:id="clSize" prefWidth="75.0" text="Size" />
-        </columns>
-      </TableView>
-      <TableView fx:id="serverInfo" layoutX="436.0" layoutY="55.0" prefHeight="468.0" prefWidth="298.0">
-         <columns>
-            <TableColumn fx:id="srName" prefWidth="75.0" text="Name" />
-            <TableColumn fx:id="srDate" prefWidth="75.0" text="Date" />
-            <TableColumn fx:id="srType" prefWidth="75.0" text="Type" />
-            <TableColumn fx:id="srSize" prefWidth="75.0" text="Size" />
-         </columns>
-      </TableView>
-   </children>
-</AnchorPane>
+<VBox prefHeight="454.0" prefWidth="1093.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ClientController">
+   <MenuBar prefHeight="25.0" prefWidth="666.0">
+     <menus>
+       <Menu text="File">
+         <items>
+           <MenuItem onAction="#btnExit" text="Close" />
+         </items>
+       </Menu>
+       <Menu text="Edit">
+         <items>
+           <MenuItem text="Delete" />
+         </items>
+       </Menu>
+       <Menu text="Help">
+         <items>
+           <MenuItem text="About" />
+         </items>
+       </Menu>
+     </menus>
+   </MenuBar>
+   <HBox alignment="TOP_CENTER" prefHeight="460.0" prefWidth="1123.0">
+
+       <VBox prefHeight="443.0" prefWidth="567.0">
+
+           <HBox prefHeight="0.0" prefWidth="340.0">
+               <children>
+                   <ComboBox fx:id="clDiskBox" onAction="#selectDisk" prefHeight="25.0" prefWidth="66.0">
+                       <HBox.margin>
+                           <Insets right="5.0" />
+                       </HBox.margin></ComboBox>
+                   <TextField fx:id="clViewPath" editable="false" prefHeight="25.0" prefWidth="438.0" VBox.vgrow="ALWAYS" />
+                   <Button onAction="#btnClPathUp" prefHeight="25.0" prefWidth="38.0" text="Up">
+                       <HBox.margin>
+                           <Insets left="5.0" />
+                       </HBox.margin></Button>
+               </children>
+           </HBox>
+           <TableView fx:id="clViewList" prefHeight="400.0" prefWidth="424.0" VBox.vgrow="ALWAYS">
+               <columns>
+                   <TableColumn fx:id="clColType" prefWidth="20" />
+                   <TableColumn fx:id="clColName" prefWidth="231.99996948242188" text="Name" />
+                   <TableColumn fx:id="clColSize" prefWidth="98.66668701171875" text="Size" />
+                   <TableColumn fx:id="clColDate" prefWidth="200.0" text="Date" />
+               </columns>
+           </TableView>
+
+
+       </VBox>
+
+       <VBox prefHeight="443.0" prefWidth="543.0">
+
+           <HBox prefHeight="0.0" prefWidth="340.0">
+               <children>
+               <Button fx:id="serverUpdate" mnemonicParsing="false" onAction="#bntServerReload" prefHeight="25.0" prefWidth="118.0" text="Server reload">
+                  <HBox.margin>
+                     <Insets left="5.0" right="5.0" />
+                  </HBox.margin>
+               </Button>
+                   <TextField fx:id="serViewPath" editable="false" prefHeight="25.0" prefWidth="347.0" VBox.vgrow="ALWAYS" />
+                   <Button prefHeight="25.0" prefWidth="38.0" text="Up">
+                       <HBox.margin>
+                           <Insets left="5.0" />
+                       </HBox.margin></Button>
+               </children>
+           </HBox>
+           <TableView fx:id="serViewList" prefHeight="400.0" prefWidth="424.0" VBox.vgrow="ALWAYS">
+               <columns>
+                   <TableColumn fx:id="serColType" prefWidth="20" />
+                   <TableColumn fx:id="serColName" prefWidth="240.0" text="Name" />
+                   <TableColumn fx:id="serColSize" prefWidth="90.6666259765625" text="Size" />
+                   <TableColumn fx:id="serColDate" prefWidth="178.00006103515625" text="Date" />
+               </columns>
+            <opaqueInsets>
+               <Insets left="5.0" />
+            </opaqueInsets>
+           </TableView>
+         <opaqueInsets>
+            <Insets left="5.0" />
+         </opaqueInsets>
+
+       </VBox>
+
+
+
+
+
+
+
+
+   </HBox>
+
+   <HBox prefHeight="100.0" prefWidth="1093.0">
+      <children>
+         <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#upload" text="Upload on Server" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+               <Insets bottom="1.0" left="5.0" right="5.0" top="1.0" />
+            </HBox.margin></Button>
+         <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#download" prefHeight="25.0" prefWidth="43.0" text="Download" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+               <Insets bottom="1.0" left="5.0" right="5.0" top="1.0" />
+            </HBox.margin></Button>
+         <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#deletePC" text="Delete" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+               <Insets bottom="1.0" left="5.0" right="5.0" top="1.0" />
+            </HBox.margin></Button>
+          <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#creatFile" text="Creat File" HBox.hgrow="ALWAYS">
+              <HBox.margin>
+                  <Insets bottom="1.0" left="5.0" right="5.0" top="1.0" />
+              </HBox.margin></Button>
+          <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#makeDir" text="Make DIR" HBox.hgrow="ALWAYS">
+              <HBox.margin>
+                  <Insets bottom="1.0" left="5.0" right="5.0" top="1.0" />
+              </HBox.margin></Button>
+         <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#btnExit" text="Exit" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+               <Insets bottom="1.0" left="5.0" right="5.0" top="1.0" />
+            </HBox.margin></Button>
+      </children>
+   </HBox>
+
+</VBox>

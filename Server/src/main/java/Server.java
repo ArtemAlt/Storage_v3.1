@@ -9,6 +9,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 
 public class Server {
     public void run() throws Exception {
@@ -29,8 +32,10 @@ public class Server {
                     })
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture future = b.bind(8189).sync();
+            log.debug("Server started on port 8189");
             future.channel().closeFuture().sync();
-        } finally {
+        }
+        finally {
             mainGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
