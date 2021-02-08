@@ -4,15 +4,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Dialog;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.GridPane;
-import javafx.util.Pair;
+import javafx.scene.layout.HBox;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +39,10 @@ public class ClientController implements Initializable {
     public Path userSerPathParent;
     public ComboBox<String> clDiskBox;
     public Button serverUpdate;
+    public TextField login;
+    public TextField password;
+    public Button btnConnect;
+    public HBox boxServer;
     private ObjectDecoderInputStream is;
     private ObjectEncoderOutputStream os;
     private String user;
@@ -105,65 +102,18 @@ public class ClientController implements Initializable {
 
     }
 
-    public void aught() {
-        // Create the custom dialog.
-        Dialog<Pair<String, String>> dialog = new Dialog<>();
-        dialog.setTitle("Authorization");
-        dialog.setHeaderText("Please enter login and password");
-        dialog.setGraphic(new ImageView(this.getClass().getResource("login.png").toString()));
-        ButtonType loginButtonType = new ButtonType("Login", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-        final TextField[] username = {new TextField()};
-        username[0].setPromptText("Username");
-        PasswordField password = new PasswordField();
-        password.setPromptText("Password");
-
-        grid.add(new Label("Username:"), 0, 0);
-        grid.add(username[0], 1, 0);
-        grid.add(new Label("Password:"), 0, 1);
-        grid.add(password, 1, 1);
-        Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
-        loginButton.setDisable(true);
-        username[0].textProperty().addListener((observable, oldValue, newValue) -> {
-            loginButton.setDisable(newValue.trim().isEmpty());
-        });
-        dialog.getDialogPane().setContent(grid);
-        Platform.runLater(() -> username[0].requestFocus());
-
-        PasswordField finalPassword = password;
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loginButtonType) {
-                user = username[0].getText();
-                userPassword = finalPassword.getText();
-                return new Pair<>(username[0].getText(), finalPassword.getText());
-            }
-            return null;
-        });
-        Optional<Pair<String, String>> result = dialog.showAndWait();
-        result.ifPresent(usernamePassword -> {
-            System.out.println("Username=" + usernamePassword.getKey() +
-                    ", Password=" + usernamePassword.getValue());
-            System.out.println(user + userPassword);
-        });
-
-    }
-
     public void initialize(URL location, ResourceBundle resources) {
         prepareColumns();
+        serverUpdate.setVisible(false);
 //        aught();
         serViewList.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                Path p = Paths.get(serViewPath.getText()).resolve( serViewList.getSelectionModel().getSelectedItem().getName());
-                log.debug("Action on chek "+ p.toString());
+                Path p = Paths.get(serViewPath.getText()).resolve(serViewList.getSelectionModel().getSelectedItem().getName());
+                log.debug("Action on chek " + p.toString());
                 if (Files.isDirectory(p)) {
                     updateServerInfo(p.toString());
                     serViewPath.setText(p.toString());
-                    log.debug("Action "+ p.toString());
+                    log.debug("Action " + p.toString());
                 }
             }
         });
@@ -179,13 +129,16 @@ public class ClientController implements Initializable {
             Socket socket = new Socket("localhost", 8189);
             os = new ObjectEncoderOutputStream(socket.getOutputStream());
             is = new ObjectDecoderInputStream(socket.getInputStream());
-            System.err.println(user + userPassword);
+
             Thread t = new Thread(() -> {
-                try {
-                    getServerPath();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
+
+//                try {
+//
+//                    getServerPath();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
                 updateClViewList(Paths.get(clViewPath.getText()));
 
                 while (true) {
@@ -213,7 +166,7 @@ public class ClientController implements Initializable {
                             userSerPath = Paths.get(dir.getDir());
                             serViewPath.setText(dir.getDir());
                             log.debug("User path userServerPath " + userSerPath.toString());
-                            if (serViewList.getItems().isEmpty()){
+                            if (serViewList.getItems().isEmpty()) {
                                 updateServerInfo(userSerPath.toString());
                             }
 
@@ -309,24 +262,13 @@ public class ClientController implements Initializable {
         );
     }
 
-//    public void btnSerPathUp(ActionEvent actionEvent) {
-//        try {
-//            getParentServerPath();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        Path upPath = userSerPathParent;
-//        if (upPath != null) {
-//            updateSerViewList(upPath);
-//        }
-//    }
-
     public void btnClPathUp(ActionEvent actionEvent) {
         Path upPath = Paths.get(clViewPath.getText()).getParent();
         if (upPath != null) {
             updateClViewList(upPath);
         }
     }
+
     public void btnServerUP(ActionEvent actionEvent) {
         try {
             os.writeObject(new ParentDirectoryRequest());
@@ -366,7 +308,7 @@ public class ClientController implements Initializable {
         try {
             os.writeObject(new ListRequest(path));
             os.flush();
-            log.debug("From client to server request "+ path);
+            log.debug("From client to server request " + path);
         } catch (IOException e) {
             log.error("e = ", e);
             e.printStackTrace();
@@ -455,4 +397,16 @@ public class ClientController implements Initializable {
     }
 
 
+    public void connect(ActionEvent actionEvent) {
+        User user = new User(login.getText(), password.getText());
+        try {
+            os.writeObject(user);
+            os.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        serverUpdate.setVisible(true);
+
+
+    }
 }

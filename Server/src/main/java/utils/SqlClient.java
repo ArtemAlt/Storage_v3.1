@@ -7,17 +7,17 @@ public class SqlClient {
     private static Statement statement;
 
 
-    synchronized static void connect() {
+    public synchronized static void connect() {
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:src/main/resources/DBStorage.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:Server/src/main/resources/DBStorage.db");
             statement = connection.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    synchronized static String getUserPath(String login, String password) {
+    synchronized public static String getUserPath(String login, String password) {
         String query = String.format("select User_path from Users where Login = '%s' and Password = '%s'",
                 login, password);
 
@@ -31,7 +31,8 @@ public class SqlClient {
 
     }
 
-    synchronized static void disconnect() {
+
+    synchronized public static void disconnect() {
         try {
             connection.close();
         } catch (SQLException e) {

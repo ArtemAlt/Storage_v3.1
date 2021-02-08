@@ -27,6 +27,7 @@ public class Server {
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
                                     new ObjectEncoder(),
                                     new MainHandler()
+
                             );
                         }
                     })

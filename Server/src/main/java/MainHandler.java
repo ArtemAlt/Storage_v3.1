@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import utils.SqlClient;
 
 @Slf4j
 public class MainHandler extends ChannelInboundHandlerAdapter {
@@ -22,7 +23,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         count++;
         clientNick = "user" + count;
-        clientDir = Paths.get("server_storage",clientNick);
+        clientDir = Paths.get("server_storage", clientNick);
         currentClientDir = clientDir;
         log.debug("Connected- " + clientNick + " directory- " + clientDir);
         if (!Files.exists(clientDir)) {
@@ -32,17 +33,25 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof User) {
+            User au = (User) msg;
+            SqlClient.connect();
+            String path = SqlClient.getUserPath(au.getLogin(),au.getPassword());
+            log.debug("Request SQL - " +path);
 
 
+
+
+        }
         if (msg instanceof ListRequest) {
             ListRequest path = (ListRequest) msg;
             log.debug("Server receive request String - " + path.getPath());
             log.debug("Server receive request- " + Paths.get(path.getPath()).toString());
             ctx.writeAndFlush(new ServerList(Files.list(Paths.get(path.getPath())).map(FilesListInfo::new).collect(Collectors.toList())));
-            log.debug("Server sent list " );
+            log.debug("Server sent list ");
             currentClientDir = Paths.get(path.getPath());
             ctx.writeAndFlush(currentClientDir);
-            log.debug("From server current client directory "+ currentClientDir.toString());
+            log.debug("From server current client directory " + currentClientDir.toString());
 
         } else if (msg instanceof FileRequest) {
             FileRequest request = (FileRequest) msg;
