@@ -41,7 +41,7 @@
                        </HBox.margin></Button>
                </children>
            </HBox>
-           <TableView fx:id="clViewList" prefHeight="400.0" prefWidth="424.0" VBox.vgrow="ALWAYS">
+           <TableView fx:id="clViewList" prefHeight="400.0" prefWidth="424.0" VBox.vgrow="ALWAYS" >
                <columns>
                    <TableColumn fx:id="clColType" prefWidth="20" />
                    <TableColumn fx:id="clColName" prefWidth="231.99996948242188" text="Name" />
@@ -63,7 +63,7 @@
                   </HBox.margin>
                </Button>
                    <TextField fx:id="serViewPath" editable="false" prefHeight="25.0" prefWidth="347.0" VBox.vgrow="ALWAYS" />
-                   <Button prefHeight="25.0" prefWidth="38.0" text="Up">
+                   <Button prefHeight="25.0" prefWidth="38.0" text="Up" onAction="#btnServerUP">
                        <HBox.margin>
                            <Insets left="5.0" />
                        </HBox.margin></Button>

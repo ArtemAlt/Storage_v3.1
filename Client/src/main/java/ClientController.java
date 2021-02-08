@@ -9,6 +9,8 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
@@ -21,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ public class ClientController implements Initializable {
     public TableView<FilesListInfo> clViewList;
     public TextField clViewPath;
     public Path userSerPath;
+    public Path currentUserServPath;
     public Path userSerPathParent;
     public ComboBox<String> clDiskBox;
     public Button serverUpdate;
@@ -96,10 +98,10 @@ public class ClientController implements Initializable {
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         serColDate.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getDate().format(dtf)));
-        serViewList.getSortOrder().add(serColType);
         clColDate.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getDate().format(dtf)));
         clViewList.getSortOrder().add(clColType);
 
+        serViewList.getSortOrder().add(serColType);
 
     }
 
@@ -153,12 +155,15 @@ public class ClientController implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
         prepareColumns();
-        aught();
+//        aught();
         serViewList.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                Path p = userSerPath.resolve(serViewList.getSelectionModel().getSelectedItem().getName());
+                Path p = Paths.get(serViewPath.getText()).resolve( serViewList.getSelectionModel().getSelectedItem().getName());
+                log.debug("Action on chek "+ p.toString());
                 if (Files.isDirectory(p)) {
-                   // updateSerViewList(p); todo: смена папки на сервере - если это папка? сменить текущую папку на сервере на эту и отобразить на клиенте
+                    updateServerInfo(p.toString());
+                    serViewPath.setText(p.toString());
+                    log.debug("Action "+ p.toString());
                 }
             }
         });
@@ -181,10 +186,8 @@ public class ClientController implements Initializable {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                updateServerInfo();
                 updateClViewList(Paths.get(clViewPath.getText()));
-                log.debug("Current user path -" + userSerPath);
-                log.debug("Current text field - " + serViewPath.getText());
+
                 while (true) {
                     try {
                         AbstractMessage msg = (AbstractMessage) is.readObject();
@@ -192,7 +195,7 @@ public class ClientController implements Initializable {
                         if (msg instanceof ServerList) {
                             ServerList list = (ServerList) msg;
                             updateUI(() -> {
-                                log.debug(" Client received -  "+ list.toString());
+                                log.debug(" Client received -  " + list.toString());
                                 serViewList.getItems().clear();
                                 serViewList.getItems().addAll(list.getServerList());
 
@@ -201,7 +204,7 @@ public class ClientController implements Initializable {
                             FileMessage file = (FileMessage) msg;
                             Path p = Paths.get(clViewPath.getText()).resolve(file.getFileName());
                             Files.write(p, file.getData());
-                            updateServerInfo();
+                            updateServerInfo(clViewPath.getText());
                             updateClViewList(Paths.get(clViewPath.getText()));
 
                         } else if (msg instanceof UserDirectory) {
@@ -209,14 +212,24 @@ public class ClientController implements Initializable {
                             log.debug("User path from server - " + dir.getDir());
                             userSerPath = Paths.get(dir.getDir());
                             serViewPath.setText(dir.getDir());
+                            log.debug("User path userServerPath " + userSerPath.toString());
+                            if (serViewList.getItems().isEmpty()){
+                                updateServerInfo(userSerPath.toString());
+                            }
 
                         } else if (msg instanceof ParentUserDirectory) {
                             ParentUserDirectory dir = (ParentUserDirectory) msg;
                             log.debug("Parent user path from server - " + dir.getDir());
-                            userSerPathParent = Paths.get(dir.getDir());
+                            userSerPath = Paths.get(dir.getDir());
+                            serViewPath.setText(dir.getDir());
+                            log.debug("Parent user path Parent UserServerPath " + userSerPath.toString());
+                            updateServerInfo(userSerPath.toString());
                         }
+                        log.debug("Current user path -" + userSerPath);
+                        log.debug("Current text field - " + serViewPath.getText());
+
                     } catch (ClassNotFoundException | IOException e) {
-                       log.debug("Error of serializing message ");
+                        log.debug("Error of serializing message ");
                     }
                 }
             });
@@ -253,7 +266,7 @@ public class ClientController implements Initializable {
         log.debug("Selected client side- " + p.toString());
         os.writeObject(new FileMessage(p));
         os.flush();
-        updateServerInfo();
+        updateServerInfo(clViewPath.getText());
         updateClViewList(Paths.get(clViewPath.getText()));
     }
 
@@ -266,7 +279,7 @@ public class ClientController implements Initializable {
         String fileName = serViewList.getSelectionModel().getSelectedItem().getName();
         os.writeObject(new FileRequest(fileName));
         os.flush();
-        updateServerInfo();
+        updateServerInfo(clViewPath.getText());
         updateClViewList(Paths.get(clViewPath.getText()));
     }
 
@@ -314,6 +327,16 @@ public class ClientController implements Initializable {
             updateClViewList(upPath);
         }
     }
+    public void btnServerUP(ActionEvent actionEvent) {
+        try {
+            os.writeObject(new ParentDirectoryRequest());
+            os.flush();
+            log.debug("Request parent directory");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public void selectDisk(ActionEvent a) {
         ComboBox<String> element = (ComboBox<String>) a.getSource();
@@ -327,7 +350,8 @@ public class ClientController implements Initializable {
     public Path getClCurrentPath() {
         return Paths.get(clViewPath.getText());
     }
-    public void disconnect(){
+
+    public void disconnect() {
         try {
             os.writeObject(new ExitRequest());
             os.flush();
@@ -337,28 +361,33 @@ public class ClientController implements Initializable {
             e.printStackTrace();
         }
     }
-    public void updateServerInfo() {
+
+    public void updateServerInfo(String path) {
         try {
-            os.writeObject(new ListRequest());
+            os.writeObject(new ListRequest(path));
             os.flush();
+            log.debug("From client to server request "+ path);
         } catch (IOException e) {
             log.error("e = ", e);
             e.printStackTrace();
         }
 
     }
+
     public void btnExit(ActionEvent actionEvent) {
         disconnect();
         Platform.exit();
     }
+
     public void bntServerReload(ActionEvent actionEvent) {
         try {
-            updateServerInfo();
+            updateServerInfo(clViewPath.getText());
             getServerPath();
         } catch (IOException e) {
             log.error("e=", e);
         }
     }
+
     public void deletePC(ActionEvent actionEvent) {
         if (clViewList.isFocused()) {
             Path p = getClCurrentPath().resolve(clViewList.getSelectionModel().getSelectedItem().getName());
@@ -376,7 +405,7 @@ public class ClientController implements Initializable {
                 os.flush();
                 Alert a = new Alert(Alert.AlertType.INFORMATION, "Deleting complete", ButtonType.OK);
                 a.showAndWait();
-                updateServerInfo();
+                updateServerInfo(clViewPath.getText());
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.WARNING, "Deleting error", ButtonType.OK);
                 a.showAndWait();
@@ -385,6 +414,7 @@ public class ClientController implements Initializable {
 
         }
     }
+
     public void makeDir(ActionEvent actionEvent) {
         TextInputDialog dialog = new TextInputDialog("Name");
         dialog.setTitle("Creat the directory");
@@ -410,17 +440,19 @@ public class ClientController implements Initializable {
         Optional<String> result = dialog.showAndWait();
         File newFile = new File(Paths.get(clViewPath.getText(), result.get()).toString());
         try {
-           if (newFile.createNewFile()){
-               Alert a = new Alert(Alert.AlertType.INFORMATION, "Creating complete", ButtonType.OK);
-               a.showAndWait();
-               updateClViewList(getClCurrentPath());
-           } else {
-               Alert a = new Alert(Alert.AlertType.WARNING, "Creating error", ButtonType.OK);
-               a.showAndWait();
-           }
+            if (newFile.createNewFile()) {
+                Alert a = new Alert(Alert.AlertType.INFORMATION, "Creating complete", ButtonType.OK);
+                a.showAndWait();
+                updateClViewList(getClCurrentPath());
+            } else {
+                Alert a = new Alert(Alert.AlertType.WARNING, "Creating error", ButtonType.OK);
+                a.showAndWait();
+            }
         } catch (IOException e) {
-            log.debug("e= ",e);
+            log.debug("e= ", e);
         }
 
     }
+
+
 }
