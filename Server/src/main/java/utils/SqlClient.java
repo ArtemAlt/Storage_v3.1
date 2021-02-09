@@ -1,6 +1,8 @@
 package utils;
 
+import java.nio.file.Paths;
 import java.sql.*;
+@lombok.extern.slf4j.Slf4j
 
 public class SqlClient {
     private static Connection connection;
@@ -29,6 +31,24 @@ public class SqlClient {
         }
         return null;
 
+    }
+    public synchronized static void regUser(String login, String password){
+
+        String userPath = Configs.serverPath+ "/" +login;
+        String query = String.format("insert into Users (Login, Password,User_path) VALUES ('%s','%s','%s')",login, password,userPath);
+        try {
+            statement.executeUpdate(query);
+        } catch (SQLException e) {
+           log.debug("SQL exception");
+        } finally {
+            if(statement!=null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    log.debug("SQL exit exception");
+                }
+            }
+        }
     }
 
 

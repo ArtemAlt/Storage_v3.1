@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import utils.Configs;
 import utils.SqlClient;
 
 @Slf4j
@@ -21,14 +22,14 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        count++;
-        clientNick = "user" + count;
-        clientDir = Paths.get("server_storage", clientNick);
-        currentClientDir = clientDir;
+//        count++;
+//        clientNick = "user" + count;
+//        clientDir = Paths.get("server_storage", clientNick);
+//        currentClientDir = clientDir;
         log.debug("Connected- " + clientNick + " directory- " + clientDir);
-        if (!Files.exists(clientDir)) {
-            Files.createDirectory(clientDir);
-        }
+//        if (!Files.exists(clientDir)) {
+//            Files.createDirectory(clientDir);
+//        }
     }
 
     @Override
@@ -36,14 +37,27 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof User) {
             User au = (User) msg;
             SqlClient.connect();
-            String path = SqlClient.getUserPath(au.getLogin(),au.getPassword());
-            log.debug("Request SQL - " +path);
-
-
-
-
+            String path = SqlClient.getUserPath(au.getLogin(), au.getPassword());
+            if (path != null) {
+                log.debug("Request SQL - " + path);
+                clientDir = Paths.get(path);
+                currentClientDir = clientDir;
+                if (!Files.exists(clientDir)) {
+            Files.createDirectory(clientDir);
         }
-        if (msg instanceof ListRequest) {
+                ctx.writeAndFlush(new UserDirectory(clientDir.toString()));
+            } else {
+                ctx.writeAndFlush(new UserReject());
+            }
+        } else if (msg instanceof RegUser) {
+            RegUser regUser = (RegUser) msg;
+            SqlClient.connect();
+            SqlClient.regUser(regUser.getLogin(), regUser.getPassword());
+            SqlClient.disconnect();
+            ctx.writeAndFlush(new RegUser(regUser.getLogin(), regUser.getPassword()));
+
+
+        } else if (msg instanceof ListRequest) {
             ListRequest path = (ListRequest) msg;
             log.debug("Server receive request String - " + path.getPath());
             log.debug("Server receive request- " + Paths.get(path.getPath()).toString());
@@ -63,6 +77,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
             Files.write(currentClientDir.resolve(file.getFileName()), file.getData());
 
         } else if (msg instanceof DirectoryRequest) {
+
             ctx.writeAndFlush(new UserDirectory(currentClientDir.toString()));
             log.debug("Send to client- " + clientNick + " server user directory - " + currentClientDir.toString());
 

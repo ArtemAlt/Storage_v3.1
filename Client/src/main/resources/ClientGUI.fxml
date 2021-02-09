@@ -26,6 +26,21 @@
    </MenuBar>
    <HBox fx:id="boxServer" alignment="TOP_RIGHT" prefHeight="100.0" prefWidth="200.0">
       <children>
+         <TextField fx:id="loginReg" layoutX="719.0" layoutY="15.0" promptText="Logon">
+            <HBox.margin>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </HBox.margin>
+         </TextField>
+         <TextField fx:id="passwordReg" layoutX="879.0" layoutY="15.0" promptText="Password">
+            <HBox.margin>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </HBox.margin>
+         </TextField>
+         <Button fx:id="btnReg" layoutX="1038.0" layoutY="15.0" mnemonicParsing="false" onAction="#registration" text="Registation">
+            <HBox.margin>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </HBox.margin>
+         </Button>
          <TextField fx:id="login" promptText="Logon">
             <HBox.margin>
                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -43,9 +58,9 @@
          </Button>
       </children>
    </HBox>
-   <HBox alignment="TOP_CENTER" prefHeight="460.0" prefWidth="1123.0">
+   <HBox alignment="TOP_CENTER" maxHeight="Infinity" prefHeight="460.0" prefWidth="1123.0">
 
-       <VBox prefHeight="443.0" prefWidth="567.0">
+       <VBox maxHeight="Infinity" prefWidth="567.0">
 
            <HBox prefHeight="0.0" prefWidth="340.0">
                <children>
@@ -72,7 +87,7 @@
 
        </VBox>
 
-       <VBox prefHeight="443.0" prefWidth="543.0">
+       <VBox maxHeight="Infinity" prefWidth="543.0">
 
            <HBox prefHeight="0.0" prefWidth="340.0">
                <children>
@@ -105,12 +120,6 @@
          </opaqueInsets>
 
        </VBox>
-
-
-
-
-
-
 
 
    </HBox>
