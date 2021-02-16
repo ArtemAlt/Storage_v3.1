@@ -1,0 +1,120 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:ClientGUI;
+:ClientController;
+:initialize;
+:prepareColumns;
+:prepare GUI action;
+: #upload;
+if (clViewList.isFocused) then (yes)
+: request FileMessage
+: update client list;
+: request ServerList;
+else
+:Alert - Select file from PC;
+endif
+: #download;
+if (serViewList.isFocused) then (yes)
+: request FileRequest;
+: update client list;
+: request ServerList;
+else
+: Alert - Select file from Server;
+endif
+: #serViewList.setOnMouseClicked;
+if (event ==2) then(yes)
+: selected item path;
+: request ListRequest;
+else
+:IOException;
+endif
+: #clViewList.setOnMouseClicked;
+if (event ==2) then(yes)
+: selected item path;
+: update client list;
+endif
+
+: open "localhost", 8189;
+: update client list;
+: #btnClPathUp;
+if (upPath != null) then (yes)
+: update client list;
+endif
+: #btnServerUP;
+if (action) then (yes)
+: request ParentDirectoryRequest;
+endif
+: #btnExit;
+if (action) then (yes)
+: request ExitRequest;
+endif
+: #deletePC;
+if (clViewList.isFocused()) then (yes)
+    : file delete;
+    : update client list;
+else (no)
+: selected item path;
+: request FileDelete;
+: Alert - Deleting complete;
+: request ListRequest;
+endif
+: #makeDir;
+if (action) then (yes)
+: dialog Creat the directory;
+ if (dir.mkdir) then (yes)
+ : Alert - Creating complete;
+ : request ListRequest;
+ else (no)
+ : Alert  - Creating error;
+ endif
+ endif
+: #creatFile;
+if (action) then (yes)
+: dialog Creat the file;
+ if (newFile.createNewFile) then (yes)
+ :Alert - Creating complete;
+ : : request ListRequest;
+ else (no)
+ :: Alert  - Creating error;
+ endif
+endif
+: #registration;
+if (action) then (yes)
+: new regUser;
+: request regUser;
+endif
+
+while (waiting read in InputStream)
+:AbstractMessage msg;
+    if (msg instanceof UserReject) then (yes)
+    :Alert - User not registered;
+
+   else if  (msg instanceof RegUser) then (yes)
+    :Alert -  User registered;
+
+   else if (msg instanceof FileMessage) then(yes)
+    : download file;
+    : update client list;
+    : request ServerList;
+
+    else if (msg instanceof UserDirectory) then (yes)
+    : User path from server;
+    : request ServerList;
+
+   else if (msg instanceof ParentUserDirectory) then (yes)
+    : Parent user path from server;
+    : request ServerList;
+
+  else if (msg instanceof ServerList) then (yes)
+    : update server list;
+
+    else if (msg instanceof exit) then (yes)
+    stop
+  endif
+endwhile
+:IOException;
+ stop
+
+@enduml

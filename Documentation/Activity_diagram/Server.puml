@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+: mainGroup;
+: workerGroup;
+: creat pipeline;
+: objectDecoder;
+: objectEncoder;
+: mainHandler;
+: bind 8189;
+while  (sync)
+endwhile (no)
+: shutdown;
+stop
+
+@enduml

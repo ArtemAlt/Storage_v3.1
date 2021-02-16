@@ -1,0 +1,86 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+abstract class AbstractMessage implements Serializable
+class AuthUser extends  AbstractMessage
+class ExitRequest extends AbstractMessage
+class FileMessage extends AbstractMessage
+class FilesListInfo extends AbstractMessage
+enum FileType
+class ListRequest extends AbstractMessage
+class ParentUserDirectory extends AbstractMessage
+class ServerList extends AbstractMessage
+FileDelete ----|> AbstractMessage
+DirectoryRequest ----|> AbstractMessage
+ParentDirectoryRequest ----|> AbstractMessage
+FileRequest ----|> AbstractMessage
+UserDirectory ----|> AbstractMessage
+RegUser ----|> AbstractMessage
+User ---|> AbstractMessage
+UserReject ----|>AbstractMessage
+
+class AuthUser{
+- User user
++  getUser()
+}
+class FileDelete{
+- String fileName
++ String getFileName()
+}
+class FileMessage{
+- String fileName
+- byte[] data
++ String getFileName()
++ byte[] getData()
+}
+class FileRequest{
+- String fileName
++ String getFilename()
+}
+ FileType ----> FilesListInfo
+ class FilesListInfo{
+ - String name
+ - FileType type
+ - LocalDateTime date
+ - long siz
+ +String getName()
+ +String toString()
+ +FileType getType()
+ +LocalDateTime getDate()
+ +long getSize()
+ }
+
+class ListRequest{
+- String path
++ String getPath()
+}
+class ParentUserDirectory{
+-String dir
++ String getDir()
+}
+class RegUser{
+-  String login
+- String password
++String getLogin()
++String getPassword()
+}
+class ServerList{
+- List<FilesListInfo> serverList
++List<FilesListInfo> getServerList()
+}
+class User{
+-String login
+-String password
+-boolean auth
++ String getLogin()
++ String getPassword()
++ boolean isAuth()
+}
+
+class UserDirectory{
+-String dir
++ String getDir()
++String toString()
+}
+
+@enduml

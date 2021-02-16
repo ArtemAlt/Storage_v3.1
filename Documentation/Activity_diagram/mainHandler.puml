@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+while (channelActive)
+:AbstractMessage msg;
+    if (msg instanceof User) then (yes)
+    : sql connection;
+    : receive user path;
+    if (path = !null) then (yes)
+        if (!exist)
+        : creat directory;
+        endif
+        : send UserDirectory;
+        endif
+        : send UserReject;
+    else if (msg instanceof RegUser) then (yes)
+    : sql connection;
+    : sql registration user;
+    : sql disconnect;
+    : send  RegUser;
+    else if (msg instanceof ListRequest) then (yes)
+    : send ServerList;
+    : current directory = request path;
+    else if (msg instanceof FileRequest) then (yes)
+    : send FileMessage;
+    : current directory = request path;
+    else if (msg instanceof FileMessage) then (yes)
+    : creat file;
+    else if (msg instanceof DirectoryRequest) then (yes)
+    : send UserDirectory;
+    else if (msg instanceof ParentDirectoryRequest) then (yes)
+    : current path.getParent;
+    : send ParentUserDirectory;
+    else if (msg instanceof ExitRequest) then (yes)
+    : channel close;
+    stop
+    else if (msg instanceof FileDelete) then (yes)
+    :file delete;
+    endif
+endwhile
+:IOException;
+stop
+
+@enduml

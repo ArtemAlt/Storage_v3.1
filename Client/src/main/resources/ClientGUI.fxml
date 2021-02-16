@@ -26,7 +26,7 @@
    </MenuBar>
    <HBox fx:id="boxServer" alignment="TOP_RIGHT" prefHeight="100.0" prefWidth="200.0">
       <children>
-         <TextField fx:id="loginReg" layoutX="719.0" layoutY="15.0" promptText="Logon">
+         <TextField fx:id="loginReg" layoutX="719.0" layoutY="15.0" promptText="Login">
             <HBox.margin>
                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
             </HBox.margin>
@@ -58,9 +58,9 @@
          </Button>
       </children>
    </HBox>
-   <HBox alignment="TOP_CENTER" maxHeight="Infinity" prefHeight="460.0" prefWidth="1123.0">
+   <HBox fx:id="mainWindow" alignment="TOP_CENTER" maxHeight="Infinity" prefHeight="460.0" prefWidth="1123.0">
 
-       <VBox maxHeight="Infinity" prefWidth="567.0">
+       <VBox fx:id="clSide" maxHeight="Infinity" prefWidth="567.0">
 
            <HBox prefHeight="0.0" prefWidth="340.0">
                <children>
@@ -87,7 +87,7 @@
 
        </VBox>
 
-       <VBox maxHeight="Infinity" prefWidth="543.0">
+       <VBox fx:id="cerSide" maxHeight="Infinity" prefWidth="543.0">
 
            <HBox prefHeight="0.0" prefWidth="340.0">
                <children>
@@ -124,7 +124,7 @@
 
    </HBox>
 
-   <HBox prefHeight="100.0" prefWidth="1093.0">
+   <HBox fx:id="buttonBox" prefHeight="100.0" prefWidth="1093.0">
       <children>
          <Button focusTraversable="false" maxWidth="Infinity" mnemonicParsing="false" onAction="#upload" text="Upload on Server" HBox.hgrow="ALWAYS">
             <HBox.margin>

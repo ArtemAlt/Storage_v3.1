@@ -1,35 +1,20 @@
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-import utils.Configs;
 import utils.SqlClient;
 
 @Slf4j
 public class MainHandler extends ChannelInboundHandlerAdapter {
-    private Path server = Paths.get("server_storage");
-    private Path clientDir;
     private Path currentClientDir;
-    private Path parentCurrentClientDir;
-    private String clientNick;
-    private static int count;
-
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        count++;
-//        clientNick = "user" + count;
-//        clientDir = Paths.get("server_storage", clientNick);
-//        currentClientDir = clientDir;
-        log.debug("Connected- " + clientNick + " directory- " + clientDir);
-//        if (!Files.exists(clientDir)) {
-//            Files.createDirectory(clientDir);
-//        }
+    public void channelActive(ChannelHandlerContext ctx)  {
+
+
     }
 
     @Override
@@ -40,7 +25,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
             String path = SqlClient.getUserPath(au.getLogin(), au.getPassword());
             if (path != null) {
                 log.debug("Request SQL - " + path);
-                clientDir = Paths.get(path);
+                Path clientDir = Paths.get(path);
                 currentClientDir = clientDir;
                 if (!Files.exists(clientDir)) {
             Files.createDirectory(clientDir);
@@ -64,7 +49,6 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
             ctx.writeAndFlush(new ServerList(Files.list(Paths.get(path.getPath())).map(FilesListInfo::new).collect(Collectors.toList())));
             log.debug("Server sent list ");
             currentClientDir = Paths.get(path.getPath());
-            ctx.writeAndFlush(currentClientDir);
             log.debug("From server current client directory " + currentClientDir.toString());
 
         } else if (msg instanceof FileRequest) {
@@ -79,7 +63,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
         } else if (msg instanceof DirectoryRequest) {
 
             ctx.writeAndFlush(new UserDirectory(currentClientDir.toString()));
-            log.debug("Send to client- " + clientNick + " server user directory - " + currentClientDir.toString());
+            log.debug("Send to client-  server user directory - " + currentClientDir.toString());
 
 
         } else if (msg instanceof ParentDirectoryRequest) {
@@ -89,7 +73,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
             log.debug("Sent parent dir - " + currentClientDir.getParent().toString());
 
         } else if (msg instanceof ExitRequest) {
-            log.debug("Disconnected- " + clientNick);
+            log.debug("Disconnected- " );
             ctx.close();
         } else if (msg instanceof FileDelete) {
             FileDelete file = (FileDelete) msg;

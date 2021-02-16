@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,10 @@ public class ClientController implements Initializable {
     public TextField loginReg;
     public TextField passwordReg;
     public Button btnReg;
+    public HBox mainWindow;
+    public VBox clSide;
+    public VBox cerSide;
+    public HBox buttonBox;
     private ObjectDecoderInputStream is;
     private ObjectEncoderOutputStream os;
 
